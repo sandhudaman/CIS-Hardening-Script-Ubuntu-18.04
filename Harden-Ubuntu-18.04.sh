@@ -125,63 +125,6 @@ echo "ACTION==\"add\", KERNEL==\"sd*\", ATTR{removable}==\"1\", RUN+=\"/bin/moun
 find / -xdev -type d \( -perm -0002 -a ! -perm -1000 \) -exec chmod a+t {} \;
 
 
-#!/bin/bash
-
-# 1.1.15 - Ensure separate partition exists for /var/log
-if grep -q "^[^#].*/var/log " /etc/fstab ; then
-  echo "Partition already exists for /var/log"
-else
-  echo "Creating partition for /var/log"
-  mkdir /var/log.old
-  mv /var/log/* /var/log.old/
-  echo "/dev/sda5 /var/log ext4 defaults 0 0" >> /etc/fstab
-  mount -a
-fi
-
-# 1.1.16 - Ensure separate partition exists for /var/log/audit
-if grep -q "^[^#].*/var/log/audit " /etc/fstab ; then
-  echo "Partition already exists for /var/log/audit"
-else
-  echo "Creating partition for /var/log/audit"
-  mkdir /var/log/audit.old
-  mv /var/log/audit/* /var/log/audit.old/
-  echo "/dev/sda6 /var/log/audit ext4 defaults 0 0" >> /etc/fstab
-  mount -a
-fi
-
-# 1.1.17 - Ensure separate partition exists for /home
-if grep -q "^[^#].*/home " /etc/fstab ; then
-  echo "Partition already exists for /home"
-else
-  echo "Creating partition for /home"
-  mkdir /home.old
-  mv /home/* /home.old/
-  echo "/dev/sda7 /home ext4 defaults 0 0" >> /etc/fstab
-  mount -a
-fi
-
-# 1.1.18 - Ensure /home partition includes the nodev option
-if grep -q "^[^#].*/home " /etc/fstab && grep -q "^[^#].*/home " /etc/fstab | grep -q nodev ; then
-  echo "nodev option already exists for /home partition"
-else
-  echo "Adding nodev option for /home partition"
-  sed -i 's/.*\/home.*/&\,nodev/' /etc/fstab
-  mount -a
-fi
-
-# 1.1.19 - Ensure nodev option set on removable media partitions
-echo "ACTION==\"add\", KERNEL==\"sd*\", ATTR{removable}==\"1\", RUN+=\"/bin/mount -o nodev,noexec,nosuid /dev/%k /mnt/usb\"" >> /etc/udev/rules.d/10-usb.rules
-
-# 1.1.20 - Ensure nosuid option set on removable media partitions
-echo "ACTION==\"add\", KERNEL==\"sd*\", ATTR{removable}==\"1\", RUN+=\"/bin/mount -o nodev,noexec,nosuid /dev/%k /mnt/usb\"" >> /etc/udev/rules.d/10-usb.rules
-
-# 1.1.21 - Ensure noexec option set on removable media partitions
-echo "ACTION==\"add\", KERNEL==\"sd*\", ATTR{removable}==\"1\", RUN+=\"/bin/mount -o nodev,noexec,nosuid /dev/%k /mnt/usb\"" >> /etc/udev/rules.d/10-usb.rules
-
-# 1.1.22 - Ensure sticky bit is set on all world-writable directories
-find / -xdev -type d \( -perm -0002 -a ! -perm -1000 \) -exec chmod a+t {} \;
-
-#!/bin/bash
 
 # 1.1.23 Disable Automounting
 echo "install cramfs /bin/true" >> /etc/modprobe.d/cramfs.conf
